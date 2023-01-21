@@ -65,6 +65,22 @@ async function run() {
             res.send(result);
         });
 
+        //get order customer and admin -------
+        app.get('/AllOrders/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { }
+            const orders = await orderCollection.find(query).toArray();
+            const users = await usersCollection.findOne({ email: email });
+            
+            if(users?.role === 'admin'){
+                res.send(orders)
+            }
+            else{
+              const order = orders?.filter(order => order.email === email)
+              res.send(order);
+            }
+        });
+
 
 
 
