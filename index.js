@@ -21,6 +21,7 @@ async function run() {
         const usersCollection = client.db("E-commerce-project").collection("users");
 
         const productsCollection = client.db("E-commerce-project").collection("products");
+        const orderCollection = client.db("E-commerce-project").collection("orders");
 
         //save user data ---------
         app.put('/users', async (req, res) => {
@@ -47,6 +48,21 @@ async function run() {
             const query = { _id: ObjectId(id) }
             const product = await productsCollection.findOne(query);
             res.send(product);
+        });
+
+        //booking product -------
+        app.get('/addToBooking/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const product = await productsCollection.findOne(query);
+            res.send(product);
+        });
+
+        // booking product save-------
+        app.post('/order', async (req, res) => {
+            const order = req.body;
+            const result = await orderCollection.insertOne(order);
+            res.send(result);
         });
 
 
