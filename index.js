@@ -20,6 +20,8 @@ async function run() {
     try {
         const usersCollection = client.db("E-commerce-project").collection("users");
 
+        const productsCollection = client.db("E-commerce-project").collection("products");
+
         //save user data ---------
         app.put('/users', async (req, res) => {
             const user = req.body
@@ -33,7 +35,14 @@ async function run() {
             res.send(result);
         });
 
+        app.get('/products', async (req, res) => {
+            const query = {}
+            const result = await productsCollection.find(query).toArray();
+            res.send(result);
+        });
 
+       
+       
 
 
 
