@@ -36,17 +36,17 @@ async function run() {
             res.send(result);
         });
 
-         // get admin user-----
-         app.get('/users/admin/:email', async (req, res) => {
+        // get admin user-----
+        app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email };
             const user = await usersCollection.findOne(query);
             res.send({ isAdmin: user?.role === 'admin' });
         });
 
-         // get customers list-----
-         app.get('/users', async (req, res) => {
-            const query = { };
+        // get customers list-----
+        app.get('/users', async (req, res) => {
+            const query = {};
             const customers = await usersCollection.find(query).toArray();
             res.send(customers);
         });
@@ -102,6 +102,13 @@ async function run() {
                 res.send(order);
             }
         });
+
+        app.get('/adminAllOrder', async (req, res) => {
+            const query = {}
+            const result = await orderCollection.find(query).toArray();
+            res.send(result);
+        });
+
 
         // booking product delete save-------
         app.delete('/order/:id', async (req, res) => {
