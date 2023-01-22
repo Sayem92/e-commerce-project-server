@@ -3,8 +3,9 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
-const port = process.env.PORT || 5000;
+const jwt = require('jsonwebtoken');
 
+const port = process.env.PORT || 5000;
 const app = express();
 
 // middleware
@@ -16,12 +17,45 @@ const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: 'unauthorized access' })
+    }
+    const token = authHeader.split(' ')[1];
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({ message: 'forbidden access' });
+        }
+        req.decoded = decoded;
+        next();
+    })
+};
+
+
 async function run() {
     try {
         const usersCollection = client.db("E-commerce-project").collection("users");
 
         const productsCollection = client.db("E-commerce-project").collection("products");
         const orderCollection = client.db("E-commerce-project").collection("orders");
+
+
+         //create jwt---------
+         app.get('/jwt', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            if (user) {
+                const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '10d' });
+                return res.send({ accessToken: token })
+            }
+
+            res.status(403).send({ accessToken: 'no token available' })
+
+        });
+
 
         //save user data ---------
         app.put('/users', async (req, res) => {
@@ -45,13 +79,21 @@ async function run() {
         });
 
         // get customers list-----
-        app.get('/users', async (req, res) => {
+        app.get('/users', verifyJWT, async (req, res) => {
             const query = {};
             const customers = await usersCollection.find(query).toArray();
             res.send(customers);
         });
 
+        // get all products-------
         app.get('/products', async (req, res) => {
+            const query = {}
+            const result = await productsCollection.find(query).toArray();
+            res.send(result);
+        });
+
+        //admin see all products---
+        app.get('/adminAllProduct', verifyJWT, async (req, res) => {
             const query = {}
             const result = await productsCollection.find(query).toArray();
             res.send(result);
@@ -103,7 +145,7 @@ async function run() {
             }
         });
 
-        app.get('/adminAllOrder', async (req, res) => {
+        app.get('/adminAllOrder', verifyJWT, async (req, res) => {
             const query = {}
             const result = await orderCollection.find(query).toArray();
             res.send(result);
