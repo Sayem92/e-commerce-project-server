@@ -43,7 +43,14 @@ async function run() {
             const user = await usersCollection.findOne(query);
             res.send({ isAdmin: user?.role === 'admin' });
         });
-        
+
+         // get customers list-----
+         app.get('/users', async (req, res) => {
+            const query = { };
+            const customers = await usersCollection.find(query).toArray();
+            res.send(customers);
+        });
+
         app.get('/products', async (req, res) => {
             const query = {}
             const result = await productsCollection.find(query).toArray();
