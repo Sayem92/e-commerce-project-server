@@ -68,23 +68,23 @@ async function run() {
         //get order customer and admin -------
         app.get('/AllOrders/:email', async (req, res) => {
             const email = req.params.email;
-            const query = { }
+            const query = {}
             const orders = await orderCollection.find(query).toArray();
             const users = await usersCollection.findOne({ email: email });
-            
-            if(users?.role === 'admin'){
+
+            if (users?.role === 'admin') {
                 res.send(orders)
             }
-            else{
-              const order = orders?.filter(order => order.email === email)
-              res.send(order);
+            else {
+                const order = orders?.filter(order => order.email === email)
+                res.send(order);
             }
         });
 
         // booking product delete save-------
         app.delete('/order/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id : ObjectId(id)}
+            const query = { _id: ObjectId(id) }
             const result = await orderCollection.deleteOne(query);
             res.send(result);
         });
